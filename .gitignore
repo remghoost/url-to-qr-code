@@ -2,4 +2,9 @@ test/
 build/
 dist/
 venv/
+old/
+main_copy.build/
+main2.spec
 main.spec
+build.txt
+*.exe

@@ -1,8 +1,13 @@
 import tkinter as tk
 from tkinter import filedialog
-import pyperclip
 import qrcode
-from PIL import Image, ImageTk
+from PIL import Image, ImageTk, ImageGrab
+import pyperclip
+import io
+import win32clipboard
+import win32con
+import os
+import atexit
 
 class URLToQRApp:
     def __init__(self, root):
@@ -11,7 +16,6 @@ class URLToQRApp:
         
         self.create_gui()
         self.clipboard_monitor()
-
 
     def clipboard_monitor(self):
         self.prev_clipboard_data = ""
@@ -37,6 +41,9 @@ class URLToQRApp:
         self.save_button = tk.Button(self.root, text="Save", command=self.save_qr_code)
         self.save_button.pack()
 
+        self.copy_to_clipboard_button = tk.Button(self.root, text="Copy to Clipboard", command=self.copy_qr_code_to_clipboard)
+        self.copy_to_clipboard_button.pack()
+
     def generate_qr_code(self, url):
         qr = qrcode.QRCode(
             version=1,
@@ -48,9 +55,11 @@ class URLToQRApp:
         qr.make(fit=True)
 
         img = qr.make_image(fill_color="black", back_color="white")
-        img = img.resize((200, 200), Image.ANTIALIAS)
+        img = img.resize((200, 200), Image.LANCZOS)
         self.qr_code_image = ImageTk.PhotoImage(img)
         self.qr_code_label.config(image=self.qr_code_image)
+        if os.path.exists("temp.png"):
+            os.remove("temp.png")
 
     def save_qr_code(self):
         file_path = filedialog.asksaveasfilename(defaultextension=".png", filetypes=[("PNG files", "*.png")])
@@ -58,7 +67,55 @@ class URLToQRApp:
             img = qrcode.make(pyperclip.paste())
             img.save(file_path)
 
+    def copy_qr_code_to_clipboard(self):
+        if os.path.exists("temp.png"):
+            print("TEMP FILE EXISTS")
+            image = Image.open("temp.png")
+            image = image.convert("RGB")
+
+            image_stream = io.BytesIO()
+            image.save(image_stream, format="BMP")
+            image_data = image_stream.getvalue()[14:]  # Skip the BMP header  
+
+            win32clipboard.OpenClipboard()
+            win32clipboard.EmptyClipboard()
+            win32clipboard.SetClipboardData(win32con.CF_DIB, image_data)
+            win32clipboard.CloseClipboard()
+            return
+        else:
+            print("DOESN'T EXIST")
+            pass
+
+        if hasattr(self, 'qr_code_image'):
+            print("PULLING FROM QR CODE IN GUI")
+
+            img = qrcode.make(pyperclip.paste())
+            img.save("temp.png")
+
+            image = Image.open("temp.png")
+            image = image.convert("RGB")
+
+            image_stream = io.BytesIO()
+            image.save(image_stream, format="BMP")
+            image_data = image_stream.getvalue()[14:]  # Skip the BMP header  
+
+            win32clipboard.OpenClipboard()
+            win32clipboard.EmptyClipboard()
+            win32clipboard.SetClipboardData(win32con.CF_DIB, image_data)
+            win32clipboard.CloseClipboard()
+
+            # os.remove("temp.png")
+
+def remove_temp_file():
+    try:
+        os.remove("temp.png")
+    except FileNotFoundError:
+        pass
+
+atexit.register(remove_temp_file)
+
 if __name__ == "__main__":
     root = tk.Tk()
+    root.geometry("250x250")
     app = URLToQRApp(root)
     root.mainloop()
