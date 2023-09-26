@@ -8,9 +8,10 @@ class URLToQRApp:
     def __init__(self, root):
         self.root = root
         self.root.title("URL to QR Code")
-
-        self.clipboard_monitor()
+        
         self.create_gui()
+        self.clipboard_monitor()
+
 
     def clipboard_monitor(self):
         self.prev_clipboard_data = ""
@@ -29,6 +30,13 @@ class URLToQRApp:
 
         self.root.after(1000, self.update_qr_code)
 
+    def create_gui(self):
+        self.qr_code_label = tk.Label(self.root, width=200, height=200)
+        self.qr_code_label.pack()
+
+        self.save_button = tk.Button(self.root, text="Save", command=self.save_qr_code)
+        self.save_button.pack()
+
     def generate_qr_code(self, url):
         qr = qrcode.QRCode(
             version=1,
@@ -43,13 +51,6 @@ class URLToQRApp:
         img = img.resize((200, 200), Image.ANTIALIAS)
         self.qr_code_image = ImageTk.PhotoImage(img)
         self.qr_code_label.config(image=self.qr_code_image)
-
-    def create_gui(self):
-        self.qr_code_label = tk.Label(self.root, width=200, height=200)
-        self.qr_code_label.pack()
-
-        self.save_button = tk.Button(self.root, text="Save", command=self.save_qr_code)
-        self.save_button.pack()
 
     def save_qr_code(self):
         file_path = filedialog.asksaveasfilename(defaultextension=".png", filetypes=[("PNG files", "*.png")])
