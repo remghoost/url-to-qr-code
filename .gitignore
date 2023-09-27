@@ -4,7 +4,10 @@ dist/
 venv/
 old/
 main_copy.build/
-main2.spec
-main.spec
+main.build/
+main.dist/
+*.spec
+installer.cfg
 build.txt
 *.exe
+test.py
