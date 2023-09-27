@@ -14,6 +14,5 @@ or
 - python main.py
 
 ## other things
-built into an exe using pyinstaller
 
 hopefully not too jank. lol.
