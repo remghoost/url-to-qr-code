@@ -11,3 +11,4 @@ installer.cfg
 build.txt
 *.exe
 test.py
+main_auto copy.py

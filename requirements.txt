@@ -1,5 +1,5 @@
 pyperclip
 qrcode
-Pillow==9.5.0
+Pillow
 pywin32
 atexit
